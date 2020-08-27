@@ -3,7 +3,7 @@
 
     This file is part of cutoffseq, https://github.com/chocoteam/cutoffseq
 
-    Copyright (c) 2019, IMT Atlantique. All rights reserved.
+    Copyright (c) 2020, IMT Atlantique. All rights reserved.
 
     Licensed under the BSD 4-clause license.
     See LICENSE file in the project root for full license information.
@@ -28,8 +28,8 @@
     <developers>
         <developer>
             <name>Charles Prud'homme</name>
-            <email>charles.prudhomme@mines-nantes.fr</email>
-            <organization>TASC, Armines</organization>
+            <email>charles.prudhomme@mimt-atlantique.fr</email>
+            <organization>TASC, LS2N CNRS UMR 6241</organization>
             <organizationUrl>http://www.emn.fr/z-info/ppc/</organizationUrl>
         </developer>
         <developer>
@@ -62,14 +62,15 @@
     </dependencies>
 
     <distributionManagement>
-        <snapshotRepository>
-            <id>ossrh</id>
-            <url>https://oss.sonatype.org/content/repositories/snapshots</url>
-        </snapshotRepository>
         <repository>
             <id>ossrh</id>
             <url>https://oss.sonatype.org/service/local/staging/deploy/maven2/</url>
         </repository>
+        <snapshotRepository>
+            <id>ossrh</id>
+            <url>https://oss.sonatype.org/content/repositories/snapshots</url>
+            <layout>default</layout>
+        </snapshotRepository>
     </distributionManagement>
 
     <profiles>
@@ -89,7 +90,7 @@
                     <plugin>
                         <groupId>org.apache.maven.plugins</groupId>
                         <artifactId>maven-gpg-plugin</artifactId>
-                        <version>1.5</version>
+                        <version>1.6</version>
                         <executions>
                             <execution>
                                 <id>sign-artifacts</id>
@@ -103,12 +104,12 @@
                     <plugin>
                         <groupId>org.apache.maven.plugins</groupId>
                         <artifactId>maven-javadoc-plugin</artifactId>
-                        <version>2.10.1</version>
+                        <version>3.1.0</version>
                         <configuration>
                             <doctitle>${project.groupId}-${project.artifactId} ${project.version} API</doctitle>
                             <windowtitle>${project.groupId}-${project.artifactId} ${project.version} API</windowtitle>
                             <!--<quiet />-->
-                            <additionalparam>-Xdoclint:none</additionalparam>
+                            <doclint>none</doclint>
                         </configuration>
                         <executions>
                             <execution>
@@ -129,19 +130,44 @@
             <plugin>
                 <groupId>org.apache.maven.plugins</groupId>
                 <artifactId>maven-compiler-plugin</artifactId>
-                <version>3.3</version>
+                <version>3.8.1</version>
+                <executions>
+                    <execution>
+                        <id>default-compile</id>
+                        <configuration>
+                            <!-- compile everything to ensure module-info contains right entries -->
+                            <release>9</release>
+                        </configuration>
+                    </execution>
+                    <execution>
+                        <id>base-compile</id>
+                        <goals>
+                            <goal>compile</goal>
+                        </goals>
+                        <!-- recompile everything for target VM except the module-info.java -->
+                        <configuration>
+                            <excludes>
+                                <exclude>module-info.java</exclude>
+                            </excludes>
+                        </configuration>
+                    </execution>
+                </executions>
+                <!-- defaults for compile and testCompile -->
                 <configuration>
-                    <optimize>true</optimize>
-                    <compilerVersion>1.8</compilerVersion>
-                    <source>1.8</source>
-                    <target>1.8</target>
-                    <encoding>ISO-8859-1</encoding>
+                    <encoding>UTF-8</encoding>
+                    <showDeprecation>true</showDeprecation>
+                    <showWarnings>true</showWarnings>
+                    <!-- Only required when JAVA_HOME isn't at least Java 9 and when haven't configured the maven-toolchains-plugin -->
+                    <jdkToolchain>
+                        <version>9</version>
+                    </jdkToolchain>
+                    <release>8</release>
                 </configuration>
             </plugin>
             <plugin>
                 <groupId>org.sonatype.plugins</groupId>
                 <artifactId>nexus-staging-maven-plugin</artifactId>
-                <version>1.6.7</version>
+                <version>1.6.8</version>
                 <extensions>true</extensions>
                 <configuration>
                     <serverId>ossrh</serverId>
@@ -152,7 +178,7 @@
             <plugin>
                 <groupId>com.mycila</groupId>
                 <artifactId>license-maven-plugin</artifactId>
-                <version>3.0</version>
+                <version>4.0.rc1</version>
                 <configuration>
                     <header>src/etc/header.txt</header>
                     <!--<header>LICENSE</header>-->
@@ -164,6 +190,7 @@
                     </properties>
                     <mapping>
                         <template>JAVADOC_STYLE</template>
+                        <java>SLASHSTAR_STYLE</java>
                     </mapping>
                     <includes>
                         <include>**/*.java</include>
@@ -183,7 +210,7 @@
             <plugin>
                 <groupId>org.apache.maven.plugins</groupId>
                 <artifactId>maven-source-plugin</artifactId>
-                <version>2.4</version>
+                <version>3.1.0</version>
                 <executions>
                     <execution>
                         <id>attach-sources</id>
@@ -196,27 +223,18 @@
             <plugin>
                 <groupId>org.apache.maven.plugins</groupId>
                 <artifactId>maven-javadoc-plugin</artifactId>
-                <version>2.10.3</version>
+                <version>3.1.0</version>
                 <configuration>
-                    <additionalparam>-Xdoclint:none</additionalparam>
-                </configuration>
-            </plugin>
-            <plugin>
-                <groupId>org.apache.maven.plugins</groupId>
-                <artifactId>maven-jar-plugin</artifactId>
-                <version>2.5</version>
-                <configuration>
-                    <archive>
-                        <manifest>
-                            <addClasspath>true</addClasspath>
-                        </manifest>
-                    </archive>
+                    <doclint>none</doclint>
+                    <sourceFileExcludes>
+                        <sourceFileExclude>module-info.java</sourceFileExclude>
+                    </sourceFileExcludes>
                 </configuration>
             </plugin>
             <plugin>
                 <groupId>org.jacoco</groupId>
                 <artifactId>jacoco-maven-plugin</artifactId>
-                <version>0.7.8</version>
+                <version>0.8.4</version>
                 <executions>
                     <execution>
                         <goals>
